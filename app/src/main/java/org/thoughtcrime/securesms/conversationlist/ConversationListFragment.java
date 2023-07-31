@@ -138,7 +138,6 @@ import org.thoughtcrime.securesms.dependencies.ApplicationDependencies;
 import org.thoughtcrime.securesms.events.ReminderUpdateEvent;
 import org.thoughtcrime.securesms.exporter.flow.SmsExportDialogs;
 import org.thoughtcrime.securesms.groups.SelectionLimits;
-import org.thoughtcrime.securesms.insights.InsightsLauncher;
 import org.thoughtcrime.securesms.jobs.ServiceOutageDetectionJob;
 import org.thoughtcrime.securesms.keyvalue.SignalStore;
 import org.thoughtcrime.securesms.lock.v2.CreateSvrPinActivity;
@@ -470,10 +469,6 @@ public class ConversationListFragment extends MainFragment implements ActionMode
     itemAnimator.disable();
     SpoilerAnnotation.resetRevealedSpoilers();
 
-    if (Util.isDefaultSmsProvider(requireContext())) {
-      InsightsLauncher.showInsightsModal(requireContext(), requireFragmentManager());
-    }
-
     if ((!requireCallback().getSearchToolbar().resolved() || !(requireCallback().getSearchToolbar().get().getVisibility() == View.VISIBLE)) && list.getAdapter() != defaultAdapter) {
       setAdapter(defaultAdapter);
     }
@@ -559,7 +554,6 @@ public class ConversationListFragment extends MainFragment implements ActionMode
 
   @Override
   public void onPrepareOptionsMenu(Menu menu) {
-    menu.findItem(R.id.menu_insights).setVisible(Util.isDefaultSmsProvider(requireContext()));
     menu.findItem(R.id.menu_clear_passphrase).setVisible(!TextSecurePreferences.isPasswordDisabled(requireContext()));
 
     ConversationFilterRequest request             = viewModel.getConversationFilterRequest();
@@ -589,9 +583,6 @@ public class ConversationListFragment extends MainFragment implements ActionMode
       return true;
     } else if (itemId == R.id.menu_invite) {
       handleInvite();
-      return true;
-    } else if (itemId == R.id.menu_insights) {
-      handleInsights();
       return true;
     } else if (itemId == R.id.menu_notification_profile) {
       handleNotificationProfile();
@@ -1139,10 +1130,6 @@ public class ConversationListFragment extends MainFragment implements ActionMode
 
   private void handleInvite() {
     getNavigator().goToInvite();
-  }
-
-  private void handleInsights() {
-    getNavigator().goToInsights();
   }
 
   private void handleNotificationProfile() {
