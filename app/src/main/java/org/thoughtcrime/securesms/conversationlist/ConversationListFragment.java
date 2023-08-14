@@ -1102,7 +1102,7 @@ public class ConversationListFragment extends MainFragment implements ActionMode
       List<MarkedMessageInfo> messageIds = SignalDatabase.threads().setAllThreadsRead();
 
       ApplicationDependencies.getMessageNotifier().updateNotification(context);
-      MarkReadReceiver.process(context, messageIds);
+      MarkReadReceiver.process(messageIds);
     });
   }
 
@@ -1119,7 +1119,7 @@ public class ConversationListFragment extends MainFragment implements ActionMode
       ApplicationDependencies.getMessageNotifier().updateNotification(context);
       stopwatch.split("notification");
 
-      MarkReadReceiver.process(context, messageIds);
+      MarkReadReceiver.process(messageIds);
       stopwatch.split("process");
 
       return null;
@@ -1622,7 +1622,7 @@ public class ConversationListFragment extends MainFragment implements ActionMode
         if (unreadCount > 0) {
           List<MarkedMessageInfo> messageIds = threadTable.setRead(threadId, false);
           ApplicationDependencies.getMessageNotifier().updateNotification(context);
-          MarkReadReceiver.process(context, messageIds);
+          MarkReadReceiver.process(messageIds);
         }
 
         ConversationUtil.refreshRecipientShortcuts();
