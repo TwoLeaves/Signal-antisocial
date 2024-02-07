@@ -24,9 +24,12 @@ jobs:
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v1
 
-      - name: Remove Android 31 (S)
-        run: $ANDROID_HOME/tools/bin/sdkmanager --uninstall "platforms;android-31"
-
+      - name: Get SDK version
+        run: |
+          sdklist=$(ls ${ANDROID_HOME}/build-tools)
+          sdkver=$(sort -t '.' -k 1,1 -k 2,2 -k 3,3 -g <<< $sdklist | tail -n 1)
+          echo "sdkver=$sdkver" >> "$GITHUB_ENV"
+        
       - name: Build with Gradle
         run: ./gradlew assemblePlayProdRelease
 
@@ -44,18 +47,19 @@ jobs:
         run: |
           echo "${KEYSTORE_BASE64}" | base64 -d > apksign.keystore
           for apk in app/build/outputs/apk/playProd/release/*-unsigned-*.apk; do
-          out=${apk/-unsigned-/-signed-}
-          ${ANDROID_HOME}/build-tools/30.0.2/apksigner sign --ks apksign.keystore --ks-pass env:KEYSTORE_PASS --out "${out}" "${apk}"
-          echo "$(sha256sum ${out})"
+            out=${apk/-unsigned-/-signed-}
+            ${ANDROID_HOME}/build-tools/${sdkver}/apksigner sign --ks apksign.keystore --ks-pass env:KEYSTORE_PASS --out "${out}" "${apk}"
+            echo "$(sha256sum ${out})"
           done
           rm apksign.keystore
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "${{ steps.get-version.outputs.VERSION }}"
+          tag_name: "${{ github.run_id }}"
           release_name: "Signal-antisocial"
           draft: false
           prerelease: false
